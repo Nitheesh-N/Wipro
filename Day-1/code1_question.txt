@@ -1,0 +1,22 @@
+Write a program that takes two numbers as input from the user and performs arithmetic operations on them using the arithmetic operators (sum, difference, product, quotient, remainder) in Java.
+
+Examples:
+
+Examples:
+int num1 = 10;
+int num2 = 5;
+int sum = num1 + num2;
+System.out.println(sum); // Output: 15
+
+Sample Input & Output:
+
+Sample Input:
+Enter the first number: 10
+Enter the second number: 5
+
+Sample Output:
+Sum: 15
+Difference: 5
+Product: 50
+Quotient: 2
+Remainder: 0

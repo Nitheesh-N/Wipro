@@ -1,0 +1,18 @@
+sum of the elements present inside the array
+1. Write a program to find the sum of the elements present inside the array.
+
+Sample Input:
+
+5
+
+1 2 3 4 5
+
+Output: the sum of the elements in the array = 15
+
+Sample Input2:
+
+3
+
+19 45 34
+
+Output: the sum of the elements in the array = 98

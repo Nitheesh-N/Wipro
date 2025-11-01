@@ -1,0 +1,15 @@
+your task is to implement two classes as shown in the diagram
+
+int gear
+int speed
+applyBrake()
+speedUp()
+toString()
+
+copy of Bicycle methods and fields in MountainBike object
+
+int seatHeight
+setHeight()
+toString()
+
+objects of MountainBike class

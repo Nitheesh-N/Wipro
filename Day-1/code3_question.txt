@@ -1,0 +1,19 @@
+Write a program that takes two integers as input and compares them using relational operators. Print 'true' if the first integer is greater than the second integer, and 'false' otherwise.
+
+Examples:
+
+Examples:
+Input: 5, 3
+Output: true
+
+Input: 2, 7
+Output: false
+
+Sample Input & Output:
+
+Sample Input:
+5
+3
+
+Sample Output:
+true

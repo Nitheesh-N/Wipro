@@ -1,0 +1,44 @@
+Generic Data Analysis using JAVA
+Description:
+You are working on a data analysis module that needs to process different types of data. Implement a class named DataAnalyzer with the following requirements:
+
+
+Constructor:
+
+The class should have a constructor that takes an array of type T as its parameter and initializes an internal data structure to store the provided array.
+
+Calculate Average Method:
+
+Implement a method named calculateAverage that calculates and returns the average of the elements in the array.
+Ensure that the method works for numeric types (e.g., Integer, Double) and does not require a separate implementation for each type.
+Find Maximum Method:
+
+Implement a method named findMaximum that finds and returns the maximum element in the array.
+Ensure that the method works for comparable types (e.g., Integer, String) and does not require a separate implementation for each type.
+Data Summary Method: (Pre-Implemented as a Boiler Plate Code)
+
+Implement a method named dataSummary that prints a summary of the data, including the average and maximum values.
+
+
+Sample Input:
+
+2
+
+4
+
+45.9
+
+46.8
+
+57.3
+
+37.8
+
+Sample Output:
+
+Data Summary:
+
+Average: 46.95
+
+Maximum: 57.3
+

@@ -1,0 +1,19 @@
+Write a program that takes two boolean values as input and performs logical operations (AND, OR) on them using the logical operators & print the result.
+
+Examples:
+
+Examples:
+boolean a = true;
+boolean b = false;
+boolean result = a && b;
+System.out.println(result); // Output: false
+
+Sample Input & Output:
+
+Sample Input:
+true
+false
+
+Sample Output:
+false
+true

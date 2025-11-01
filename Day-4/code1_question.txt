@@ -1,0 +1,2 @@
+oops rectangle
+Create a Java class called "Rectangle" that represents a rectangle shape. The class should have instance variables for the length and width of the rectangle. It should also have methods to calculate the area and perimeter of the rectangle. Write the Java class "Rectangle" according to the given specifications and demonstrate its usage by creating objects and invoking the methods.

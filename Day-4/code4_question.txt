@@ -1,0 +1,18 @@
+Volume
+Write a program in java to exploit constructor overloading. (cube and cuboid volume calculation)
+
+i)  Create a class ThreeDimensionShape with three variables width, height, depth;
+
+ii)  Create three constructors
+
+a)     Doesn’t accepts any parameter
+
+b)     Accepts 1 parameter of type double(length)
+
+c)     Accepts 3 parameter of type double(width, height, depth)
+
+iii)  Create a method volume of type double that returns a product of width, height, and depth.
+
+iv)  in case of No argument constructor make length=width=depth = 0;
+
+v)  in case of 1 argument constructor make length=width=depth = length;

@@ -1,0 +1,16 @@
+Exception Handling
+Write a Java program to create a method that takes a string as input and throws an exception if the string does not contain vowels.
+
+
+
+Sample Output:
+
+Original string: Java handling and managing exceptions
+
+String contains vowels.
+
+
+
+Original string: Typy gyps fly.
+
+String does not contain any vowels
