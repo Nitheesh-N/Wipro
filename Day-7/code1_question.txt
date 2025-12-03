@@ -1,0 +1,2 @@
+Employee class
+Create class Employee with attributes id, name, salary and department. Create a collection of few Employee objects. Find the average of salaries of employees who belong to the “development” department

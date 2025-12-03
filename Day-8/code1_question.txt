@@ -1,0 +1,32 @@
+Thread in java
+You are required to build a calculator using concept of multithreading which performs the following arithematic operations:
+
+Sum, difference, product , ratio, power.
+
+Input Format  - two line separated integers
+
+Output Format  
+
+See in sample output
+
+Input 
+
+6
+
+8
+
+Output
+
+ARITHEMATIC OPERATIONS
+
+SUM 14
+
+DIFFERENCE -2
+
+PRODUCT 48
+
+RATIO 0
+
+POWER 1679616.0
+
+END OF A
