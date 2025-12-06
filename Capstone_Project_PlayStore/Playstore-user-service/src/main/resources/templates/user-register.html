@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Create User Account – PlayStore</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-gradient">
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Create your PlayStore account</h2>
+            <p>Join the community to rate apps, post reviews, and track updates.</p>
+        </div>
+
+        <form id="registerForm" class="auth-form">
+            <div class="form-group">
+                <label for="name">Full name</label>
+                <input id="name" type="text" placeholder="John Doe" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email address</label>
+                <input id="email" type="email" placeholder="you@example.com" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input id="password" type="password" placeholder="Choose a strong password" required>
+            </div>
+
+            <button type="submit" class="btn primary full-width">Sign up</button>
+        </form>
+
+        <p id="message" class="status"></p>
+
+        <p class="switch">
+            Already have an account?
+            <a th:href="@{/user/login}">Login instead</a>
+        </p>
+
+        <a th:href="@{/}" class="back-link">← Back to home</a>
+    </div>
+</div>
+
+<script>
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const user = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        password: document.getElementById('password').value
+    };
+
+    const msg = document.getElementById('message');
+    msg.textContent = 'Creating your account...';
+    msg.className = 'status';
+
+    try {
+        const res = await fetch('/api/users/register', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(user)
+        });
+        const text = await res.text();
+        msg.textContent = text;
+        msg.classList.add(res.ok ? 'success' : 'error');
+    } catch (err) {
+        msg.textContent = 'Something went wrong. Please try again.';
+        msg.classList.add('error');
+    }
+});
+</script>
+</body>
+</html>

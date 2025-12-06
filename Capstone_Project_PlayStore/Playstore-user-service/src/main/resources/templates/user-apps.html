@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Browse Apps</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-gradient">
+<header class="nav">
+    <nav class="nav-right">
+        <button id="logoutBtn" class="logout-btn">Logout</button>
+    </nav>
+</header>
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Discover Applications</h2>
+            <p>Search apps by name or category and read user reviews.</p>
+        </div>
+
+        <form id="searchForm" class="auth-form" style="margin-bottom: 14px;">
+            <div class="form-group">
+                <label for="name">Search by name</label>
+                <input id="name" type="text" placeholder="e.g. music, chat">
+            </div>
+            <div class="form-group">
+                <label for="category">Genre</label>
+                <input id="category" type="text" placeholder="e.g. Games, Tools">
+            </div>
+            <div class="form-group">
+                <label for="ratingFilter">Minimum rating</label>
+                <select id="ratingFilter">
+                    <option value="">All ratings</option>
+                    <option value="4">4★ & up</option>
+                    <option value="3">3★ & up</option>
+                    <option value="2">2★ & up</option>
+                    <option value="1">1★ & up</option>
+                </select>
+            </div>
+            <button type="submit" class="btn primary full-width">Search</button>
+        </form>
+
+        <ul id="appsList" style="list-style:none; padding-left:0;"></ul>
+
+        <a th:href="@{/user/dashboard}" class="back-link">← Back to home</a>
+    </div>
+</div>
+
+<script>
+async function loadApps(name, genre, minRating) {
+    const params = new URLSearchParams();
+    if (name) params.append('name', name);
+    if (genre) params.append('genre', genre);
+    if (minRating) params.append('minRating', minRating);
+
+    const url = '/api/apps/search' + (params.toString() ? '?' + params.toString() : '');
+    const res = await fetch(url);
+    const apps = await res.json();
+
+    const list = document.getElementById('appsList');
+    list.innerHTML = '';
+
+    if (!apps.length) {
+        const li = document.createElement('li');
+        li.textContent = 'No apps found.';
+        list.appendChild(li);
+        return;
+    }
+
+    apps.forEach(app => {
+        const li = document.createElement('li');
+        li.style.padding = '10px 0';
+        li.style.borderBottom = '1px solid #e5e7eb';
+
+        const title = document.createElement('div');
+        title.style.fontWeight = '600';
+        title.textContent = app.name + (app.genre ? ' · ' + app.genre : '');
+
+        const desc = document.createElement('div');
+        desc.style.fontSize = '0.9rem';
+        desc.style.color = '#6b7280';
+        desc.textContent = app.description || 'No description';
+
+        const link = document.createElement('a');
+        link.href = '/apps/' + app.id;
+        link.textContent = 'View details & reviews';
+        link.className = 'back-link';
+        link.style.marginTop = '4px';
+        link.style.display = 'inline-block';
+
+        li.appendChild(title);
+        li.appendChild(desc);
+        li.appendChild(link);
+        list.appendChild(li);
+    });
+}
+
+document.getElementById('searchForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const name = document.getElementById('name').value.trim();
+    const genre = document.getElementById('category').value.trim();
+    const minRating = document.getElementById('ratingFilter').value;
+    loadApps(name, genre, minRating);
+});
+
+
+loadApps();
+
+const logoutBtn = document.getElementById('logoutBtn');
+logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem('userJwt');
+    window.location.href = '/';
+});
+</script>
+
+</body>
+</html>

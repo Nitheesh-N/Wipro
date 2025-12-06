@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Apps</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-gradient">
+<div class="auth-container">
+    <div class="auth-card">
+        <h2>Your Applications</h2>
+
+        <form id="createAppForm" class="auth-form">
+            <div class="form-group">
+                <label for="name">App name</label>
+                <input id="name" type="text" required>
+            </div>
+            <div class="form-group">
+                <label for="category">Category</label>
+                <input id="category" type="text">
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <input id="description" type="text">
+            </div>
+            <div class="form-group">
+                <label for="features">Features (comma separated)</label>
+                <input id="features" type="text">
+            </div>
+            <button type="submit" class="btn primary full-width">Create App</button>
+        </form>
+
+        <p id="msg" class="status-text"></p>
+
+        <h3 style="margin-top:18px;">Existing apps</h3>
+        <ul id="appsList"></ul>
+
+        <a th:href="@{/}" class="back-link">← Back to Owner Home</a>
+    </div>
+</div>
+
+<script>
+const token = localStorage.getItem('ownerJwt');
+const ownerId = localStorage.getItem('ownerId');
+
+async function loadApps() {
+    if (!ownerId || !token) return;
+
+    const res = await fetch(`/api/owners/apps/owner/${ownerId}`, {
+        headers: { 'Authorization': 'Bearer ' + token }
+    });
+
+    if (!res.ok) return;
+
+    const apps = await res.json();
+    const list = document.getElementById('appsList');
+    list.innerHTML = '';
+    apps.forEach(a => {
+        const li = document.createElement('li');
+        li.textContent = `${a.name} (${a.category || 'No category'}) - ` +
+                (a.visible ? 'Visible' : 'Hidden');
+        list.appendChild(li);
+    });
+}
+
+document.getElementById('createAppForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const msg = document.getElementById('msg');
+
+    if (!token || !ownerId) {
+        msg.textContent = 'Please login as Owner first.';
+        msg.className = 'status-text error';
+        return;
+    }
+
+    const app = {
+        name: document.getElementById('name').value,
+        category: document.getElementById('category').value,
+        description: document.getElementById('description').value,
+        features: document.getElementById('features').value,
+        visible: true,
+        ownerId: Number(ownerId)
+    };
+
+    const res = await fetch('/api/owners/apps', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify(app)
+    });
+
+    if (!res.ok) {
+        const text = await res.text();
+        msg.textContent = text || 'Failed to create app.';
+        msg.className = 'status-text error';
+        return;
+    }
+
+    msg.textContent = 'App created successfully.';
+    msg.className = 'status-text success';
+    document.getElementById('createAppForm').reset();
+    loadApps();
+});
+
+
+loadApps();
+</script>
+
+</body>
+</html>

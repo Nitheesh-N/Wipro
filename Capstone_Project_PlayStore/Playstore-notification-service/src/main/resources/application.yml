@@ -1,0 +1,23 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: Playstore-notification-service
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: vtu19801.soc.aids@gmail.com
+    password: tzjkkwbmzgnqesbm
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/

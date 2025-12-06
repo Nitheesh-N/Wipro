@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Owner Registration</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-gradient">
+<div class="auth-container">
+    <div class="auth-card">
+        <h2>Create Owner Account</h2>
+        <p class="subtitle">Register to publish and manage your applications on PlayStore.</p>
+
+        <form id="registerForm" class="auth-form">
+            <div class="form-group">
+                <label for="name">Full name</label>
+                <input type="text" id="name" placeholder="Enter your full name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email address</label>
+                <input type="email" id="email" placeholder="owner@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Choose a strong password" required>
+            </div>
+
+            <button type="submit" class="btn primary full-width">Sign up as Owner</button>
+        </form>
+
+        <p id="registerMsg" class="status-text"></p>
+
+
+        <p class="switch-link">
+            Already have an account?
+            <a th:href="@{/owner/login}">Login here</a>
+        </p>
+
+        <a th:href="@{/}" class="back-link">← Back to Owner Home</a>
+    </div>
+</div>
+
+<script>
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const owner = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        password: document.getElementById('password').value
+    };
+
+    const msg = document.getElementById('registerMsg');
+    msg.textContent = 'Registering...';
+    msg.className = 'status-text';
+
+    try {
+        const res = await fetch('/api/owners/register', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(owner)
+        });
+
+        if (!res.ok) {
+            const text = await res.text();
+            msg.textContent = text || 'Registration failed.';
+            msg.classList.add('error');
+            return;
+        }
+
+        msg.textContent = 'Registration successful. You can login now.';
+        msg.classList.add('success');
+    } catch (err) {
+        msg.textContent = 'Error contacting server.';
+        msg.classList.add('error');
+    }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>App details</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="nav">
+    <div class="logo-text">PlayStore</div>
+</header>
+
+<main class="page-main">
+    <div class="card">
+        <h1 id="appName" class="app-title">Loading...</h1>
+        <div id="metaLine" class="meta"></div>
+
+        <div id="badges">
+            <span id="genreBadge" class="badge" style="display:none;"></span>
+            <span id="versionBadge" class="badge" style="display:none;"></span>
+        </div>
+
+        <div class="section-title">Description</div>
+        <div id="appDescription" class="section-body">Loading description...</div>
+
+        <div class="section-title">Details</div>
+        <div class="section-body">
+            <div>Release date: <span id="releaseDate">-</span></div>
+            <div>Average rating: <span id="rating" class="rating">-</span> ★</div>
+            <button id="downloadBtn" class="review-btn" style="margin-top:10px;">Download</button>
+        </div>
+        <div class="section-title">Announcements</div>
+        <div id="announcementsList" class="section-body" style="max-height:180px; overflow-y:auto;"></div>
+        
+        <!-- REVIEW FORM -->
+        <div class="review-section">
+            <div class="section-title">Write a Review</div>
+            <div class="review-form">
+                <div class="stars" id="stars">
+                    <span class="star" data-rating="1">★</span>
+                    <span class="star" data-rating="2">★</span>
+                    <span class="star" data-rating="3">★</span>
+                    <span class="star" data-rating="4">★</span>
+                    <span class="star" data-rating="5">★</span>
+                </div>
+                <textarea id="reviewComment" class="review-textarea" placeholder="Share your thoughts about this app..."></textarea>
+                <button id="submitReview" class="review-btn" disabled>Submit Review</button>
+            </div>
+        </div>
+
+        
+        <div class="section-title">Reviews (<span id="reviewsCount">0</span>)</div>
+        <div id="reviewsList" class="reviews-list"></div>
+
+        <a th:href="@{/user/dashboard}" class="back-link">← Back to apps</a>
+    </div>
+</main>
+
+<script>
+let currentAppId = null;
+
+function getAppIdFromPath() {
+    const segments = window.location.pathname.split('/');
+    return segments[segments.length - 1];
+}
+
+async function loadAppDetails() {
+    currentAppId = getAppIdFromPath();
+    if (!currentAppId) {
+        document.getElementById('appName').textContent = 'App not found';
+        return;
+    }
+
+    try {
+        const res = await fetch(`http://localhost:8082/api/owners/apps/${currentAppId}`);
+        if (!res.ok) {
+            document.getElementById('appName').textContent = 'App not found';
+            return;
+        }
+
+        const app = await res.json();
+        document.getElementById('appName').textContent = app.name || 'Unnamed app';
+        document.getElementById('appDescription').textContent = app.description || 'No description provided.';
+        document.getElementById('releaseDate').textContent = app.releaseDate || '-';
+        document.getElementById('rating').textContent = (app.averageRating || 0).toFixed(1);
+
+        await loadReviews();
+        await loadAnnouncements();
+    } catch (error) {
+        console.error('Error loading app:', error);
+    }
+}
+
+async function loadReviews() {
+    if (!currentAppId) return;
+
+    try {
+        const res = await fetch(`http://localhost:8081/api/user/apps/${currentAppId}/reviews`);
+        if (!res.ok) {
+            document.getElementById('reviewsCount').textContent = '0';
+            document.getElementById('reviewsList').innerHTML = '<div>No reviews yet</div>';
+            return;
+        }
+        const reviews = await res.json();
+
+        document.getElementById('reviewsCount').textContent = reviews.length;
+        const reviewsList = document.getElementById('reviewsList');
+        reviewsList.innerHTML = reviews.map(review => `
+            <div class="review-item">
+                <div class="review-header">
+                    <span class="review-email">${review.userEmail}</span>
+                    <span class="review-rating">${review.rating} ★</span>
+                </div>
+                <div>${review.comment}</div>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Error loading reviews:', error);
+        document.getElementById('reviewsCount').textContent = '0';
+                document.getElementById('reviewsList').innerHTML = '<div>No reviews yet</div>';
+    }
+}
+
+async function loadAnnouncements() {
+    if (!currentAppId) return;
+    try {
+        const res = await fetch(`http://localhost:8082/api/owners/announcements/app/${currentAppId}`);
+        const listElem = document.getElementById('announcementsList');
+
+        if (!res.ok) {
+            listElem.textContent = 'No announcements.';
+            return;
+        }
+
+        const anns = await res.json();
+        if (!anns.length) {
+            listElem.textContent = 'No announcements yet.';
+            return;
+        }
+
+        listElem.innerHTML = anns.map(a => `
+        <div class="announcement-item">
+            <div class="announcement-item-title">${a.title}</div>
+            <div class="announcement-item-message">${a.message}</div>
+            <div class="announcement-item-time">${a.createdAt}</div>
+        </div>
+    `).join('');
+
+    } catch (e) {
+        console.error('Error loading announcements', e);
+    }
+}
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const stars = document.querySelectorAll('.star');
+    let selectedRating = 0;
+
+    
+    stars.forEach(star => {
+        star.addEventListener('click', () => {
+            selectedRating = parseInt(star.dataset.rating);
+            stars.forEach(s => s.classList.remove('filled'));
+            for (let i = 0; i < selectedRating; i++) {
+                stars[i].classList.add('filled');
+            }
+            document.getElementById('submitReview').disabled = false;
+        });
+    });
+
+    
+    document.getElementById('submitReview').addEventListener('click', async () => {
+        const comment = document.getElementById('reviewComment').value.trim();
+        const rating = selectedRating;
+
+        if (rating === 0 || !comment) {
+            alert('Please select a rating and write a comment');
+            return;
+        }
+
+        
+        const userToken = localStorage.getItem('userJwt');
+        if (!userToken) {
+            alert('You must be logged in to submit a review');
+            return;
+        }
+
+        const body = {
+            appId: parseInt(currentAppId),
+            rating: rating,
+            comment: comment
+        };
+
+        try {
+            const res = await fetch(`http://localhost:8081/api/user/apps/${currentAppId}/reviews`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${userToken}`
+                },
+                body: JSON.stringify(body)
+            });
+
+            if (res.ok) {
+                document.getElementById('reviewComment').value = '';
+                stars.forEach(s => s.classList.remove('filled'));
+                selectedRating = 0;
+                document.getElementById('submitReview').disabled = true;
+                await loadAppDetails(); 
+                alert('Review submitted successfully!');
+            } else {
+                alert('Failed to submit review. Status: ' + res.status);
+            }
+        } catch (error) {
+            console.error('Review error:', error);
+            alert('Error submitting review');
+        }
+    });
+
+    
+    const downloadBtn = document.getElementById('downloadBtn');
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', async () => {
+            const userToken = localStorage.getItem('userJwt');
+            if (!userToken) {
+                alert('You must be logged in to download');
+                return;
+            }
+
+            try {
+                const res = await fetch(`http://localhost:8081/api/user/apps/${currentAppId}/download`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+
+                if (res.ok) {
+                    alert('Download started and recorded!');
+                } else {
+                    alert('Failed to download. Status: ' + res.status);
+                }
+            } catch (error) {
+                console.error('Download error:', error);
+                alert('Error while downloading');
+            }
+        });
+    }
+});
+
+
+loadAppDetails();
+</script>
+</body>
+</html>
+        

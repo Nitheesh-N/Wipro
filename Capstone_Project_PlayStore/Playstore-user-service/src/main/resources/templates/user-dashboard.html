@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>User dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-gradient">
+<header class="nav">
+    <nav class="nav-right">
+        <button id="logoutBtn" class="logout-btn">Logout</button>
+    </nav>
+</header>
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Welcome to PlayStore</h2>
+            <p>Browse apps and write reviews using your account.</p>
+        </div>
+
+        <div class="auth-form">
+            <button class="btn primary full-width"
+                    th:onclick="'window.location.href=\'' + @{/user/apps} + '\';'">
+                Browse apps & reviews
+            </button>
+        </div>
+
+        <a th:href="@{/}" class="back-link">← Back to home</a>
+    </div>
+</div>
+
+<script>
+const btn = document.getElementById('logoutBtn');
+btn.style.background = 'transparent';
+btn.style.border = 'none';
+btn.style.color = 'white';
+btn.style.cursor = 'pointer';
+
+btn.addEventListener('click', () => {
+    localStorage.removeItem('userJwt');   
+    window.location.href = '/';  
+});
+</script>
+</body>
+</html>

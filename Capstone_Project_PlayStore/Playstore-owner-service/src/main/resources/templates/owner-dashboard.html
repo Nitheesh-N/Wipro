@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Owner dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-gradient">
+
+<header class="nav">
+    <div class="nav-left">
+        <span class="logo-text">PlayStore Owner</span>
+    </div>
+    <nav class="nav-right">
+        <button id="ownerLogoutBtn" class="logout-btn">Logout</button>
+    </nav>
+</header>
+
+<main class="page-main">
+    <div class="dashboard-grid">
+
+        
+        <section class="card">
+            <h3>Your applications</h3>
+            <p class="subtitle">Add, update, hide apps and see downloads.</p>
+
+            
+            <div style="margin-bottom:10px; display:flex; flex-direction:column; gap:6px;">
+                <input id="newAppName" class="field" placeholder="App name">
+                <input id="newAppVersion" class="field" placeholder="Version (e.g. 1.0.0)">
+                <input id="newAppGenre" class="field" placeholder="Genre (e.g. Social, Games)">
+                <input id="newAppReleaseDate" class="field" placeholder="Release date (e.g. 2025-12-05)">
+                <textarea id="newAppDescription" class="textarea" placeholder="Short description"></textarea>
+                <div style="display:flex; justify-content:flex-end;">
+                    <button id="createAppBtn" class="btn primary small">Add app</button>
+                </div>
+            </div>
+
+            <table id="appsTable">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Downloads</th>
+                    <th>Rating</th>
+                    <th>Status</th>
+                    <th style="text-align:right;">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                
+                </tbody>
+            </table>
+        </section>
+
+        
+        <section class="card">
+            <h3>Reviews & responses</h3>
+            <p class="subtitle" id="reviewsSubtitle">Select an app to view reviews.</p>
+            <div id="reviewsContainer" style="max-height:260px; overflow-y:auto; font-size:0.85rem;"></div>
+        </section>
+
+        
+        <section class="card">
+            <h3>Announce updates</h3>
+            <p class="subtitle">Share what's new with your users.</p>
+            <select id="announceAppSelect" class="field" style="margin-bottom:8px;"></select>
+            <input id="announceTitle" class="field" placeholder="Title" style="margin-bottom:8px;">
+            <textarea id="announceMessage" class="textarea" placeholder="Describe the update..."></textarea>
+            <div style="margin-top:8px; display:flex; justify-content:flex-end;">
+                <button id="announceBtn" class="btn primary small">Post announcement</button>
+            </div>
+        </section>
+
+        
+        <section class="card">
+            <h3>Notifications</h3>
+            <p class="subtitle">Download events & actions.</p>
+            <div id="notifArea" style="font-size:0.85rem;"></div>
+            <div id="notificationsList" style="font-size:0.85rem;"></div>
+        </section>
+
+    </div>
+</main>
+
+<script>
+
+const OWNER_APPS_URL = '/api/owners/apps';
+let ownerApps = [];
+let editingAppId = null; 
+
+
+document.getElementById('ownerLogoutBtn').addEventListener('click', () => {
+    localStorage.removeItem('ownerJwt');
+    localStorage.removeItem('ownerId');
+    window.location.href = '/';
+});
+
+
+function ownerHeaders() {
+    const token = localStorage.getItem('ownerJwt');
+    return token ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+                 : { 'Content-Type': 'application/json' };
+}
+
+function pushNotif(text) {
+    const area = document.getElementById('notifArea');
+    const div = document.createElement('div');
+    div.textContent = text;
+    area.prepend(div);
+}
+
+
+async function loadApps() {
+    const ownerId = localStorage.getItem('ownerId');
+    if (!ownerId) {
+        console.warn('No ownerId in localStorage, redirecting to login.');
+        window.location.href = '/owner/login';
+        return;
+    }
+
+    const res = await fetch(`${OWNER_APPS_URL}/owner/${ownerId}`, {
+        headers: ownerHeaders()
+    });
+    const apps = await res.json();
+    ownerApps = apps;
+    const tbody = document.querySelector('#appsTable tbody');
+    const select = document.getElementById('announceAppSelect');
+    tbody.innerHTML = '';
+    select.innerHTML = '';
+
+    apps.forEach(app => {
+        const tr = document.createElement('tr');
+
+        const tdName = document.createElement('td');
+        tdName.textContent = app.name;
+
+        const tdDl = document.createElement('td');
+        tdDl.textContent = app.downloadCount || 0;
+
+        const tdRating = document.createElement('td');
+        tdRating.textContent = (app.averageRating || 0).toFixed(1);
+
+        const tdStatus = document.createElement('td');
+        const badge = document.createElement('span');
+        badge.className = 'badge ' + (app.visible ? 'visible' : 'hidden');
+        badge.textContent = app.visible ? 'Visible' : 'Hidden';
+        tdStatus.appendChild(badge);
+
+        const tdActions = document.createElement('td');
+        tdActions.style.textAlign = 'right';
+
+        
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn secondary small';
+        editBtn.textContent = 'Edit';
+        editBtn.onclick = () => editApp(app.id);
+
+        const toggleBtn = document.createElement('button');
+        toggleBtn.className = 'btn secondary small';
+        toggleBtn.style.marginLeft = '6px';
+        toggleBtn.textContent = app.visible ? 'Hide' : 'Show';
+        toggleBtn.onclick = () => toggleVisibility(app.id, !app.visible);
+
+        const reviewsBtn = document.createElement('button');
+        reviewsBtn.className = 'btn secondary small';
+        reviewsBtn.style.marginLeft = '6px';
+        reviewsBtn.textContent = 'Reviews';
+        reviewsBtn.onclick = () => loadReviews(app.id, app.name);
+
+        tdActions.appendChild(editBtn);
+        tdActions.appendChild(toggleBtn);
+        tdActions.appendChild(reviewsBtn);
+
+
+
+        tr.appendChild(tdName);
+        tr.appendChild(tdDl);
+        tr.appendChild(tdRating);
+        tr.appendChild(tdStatus);
+        tr.appendChild(tdActions);
+
+        tbody.appendChild(tr);
+
+        const opt = document.createElement('option');
+        opt.value = app.id;
+        opt.textContent = app.name;
+        select.appendChild(opt);
+    });
+}
+
+function editApp(appId) {
+    const app = ownerApps.find(a => a.id === appId);
+    if (!app) return;
+
+    editingAppId = appId;
+
+    document.getElementById('newAppName').value = app.name || '';
+    document.getElementById('newAppVersion').value = app.version || '';
+    document.getElementById('newAppGenre').value = app.genre || '';
+    document.getElementById('newAppReleaseDate').value = app.releaseDate || '';
+    document.getElementById('newAppDescription').value = app.description || '';
+
+    document.getElementById('createAppBtn').textContent = 'Update app';
+}
+
+
+async function toggleVisibility(appId, visible) {
+    await fetch(`/api/owners/apps/${appId}/visibility?visible=${visible}`, {
+        method: 'PATCH',
+        headers: ownerHeaders()
+    });
+    pushNotif(`App ${appId} visibility changed to ${visible ? 'Visible' : 'Hidden'}.`);
+    loadApps();
+}
+
+
+document.getElementById('createAppBtn').addEventListener('click', async () => {
+    const ownerId = localStorage.getItem('ownerId');
+    if (!ownerId) {
+        window.location.href = '/owner/login';
+        return;
+    }
+
+    const name = document.getElementById('newAppName').value.trim();
+    const version = document.getElementById('newAppVersion').value.trim();
+    const genre = document.getElementById('newAppGenre').value.trim();
+    const releaseDate = document.getElementById('newAppReleaseDate').value.trim();
+    const description = document.getElementById('newAppDescription').value.trim();
+
+    if (!name) return;
+
+    const payload = {
+        name,
+        version,
+        genre,
+        releaseDate,
+        description,
+        ownerId: Number(ownerId)
+    };
+
+    const isEdit = editingAppId !== null;
+    const url = isEdit
+        ? `${OWNER_APPS_URL}/${editingAppId}`
+        : OWNER_APPS_URL;
+    const method = isEdit ? 'PUT' : 'POST';
+
+    await fetch(url, {
+        method,
+        headers: ownerHeaders(),
+        body: JSON.stringify(payload)
+    });
+
+    
+    editingAppId = null;
+    document.getElementById('createAppBtn').textContent = 'Add app';
+    document.getElementById('newAppName').value = '';
+    document.getElementById('newAppVersion').value = '';
+    document.getElementById('newAppGenre').value = '';
+    document.getElementById('newAppReleaseDate').value = '';
+    document.getElementById('newAppDescription').value = '';
+
+    pushNotif(`${isEdit ? 'Updated' : 'Created'} app "${name}".`);
+    loadApps();
+});
+
+
+
+async function loadReviews(appId, appName) {
+    const subtitle = document.getElementById('reviewsSubtitle');
+    subtitle.textContent = `Reviews for ${appName}`;
+    const box = document.getElementById('reviewsContainer');
+    box.innerHTML = 'Loading...';
+
+    const res = await fetch(`/api/owners/apps/${appId}/reviews`, {
+        headers: ownerHeaders()
+    });
+    const reviews = await res.json();
+    box.innerHTML = '';
+
+    if (!reviews.length) {
+        box.textContent = 'No reviews yet.';
+        return;
+    }
+
+    let sum = 0;
+
+    reviews.forEach(r => {
+        sum += r.rating;
+        const wrap = document.createElement('div');
+        wrap.style.borderBottom = '1px solid rgba(55,65,81,0.8)';
+        wrap.style.padding = '6px 0';
+
+        const l1 = document.createElement('div');
+        l1.style.fontWeight = '600';
+        l1.textContent = `${r.rating}★ · ${r.userEmail}`;
+
+        const l2 = document.createElement('div');
+        l2.textContent = r.comment;
+
+        wrap.appendChild(l1);
+        wrap.appendChild(l2);
+        box.appendChild(wrap);
+    });
+
+    const avg = sum / reviews.length;
+    pushNotif(`Average rating for ${appName}: ${avg.toFixed(1)}★`);
+    
+    await loadApps();
+}
+
+
+document.getElementById('announceBtn').addEventListener('click', async () => {
+    const appId = document.getElementById('announceAppSelect').value;
+    const title = document.getElementById('announceTitle').value.trim();
+    const msg = document.getElementById('announceMessage').value.trim();
+    if (!appId || !title || !msg) {
+        alert('Select app and fill title/message');
+        return;
+    }
+
+    const params = new URLSearchParams({ appId, title, message: msg });
+
+    const res = await fetch('http://localhost:8082/api/owners/announcements?' + params.toString(), {
+        method: 'POST',
+        headers: ownerHeaders()
+    });
+
+    if (res.ok) {
+        pushNotif(`Announcement posted for app ${appId}: ${title}`);
+        document.getElementById('announceTitle').value = '';
+        document.getElementById('announceMessage').value = '';
+    } else {
+        alert('Failed to post announcement: ' + res.status);
+    }
+});
+
+
+async function loadDownloadNotifications() {
+    const token = localStorage.getItem('ownerJwt'); 
+
+    const res = await fetch('http://localhost:8082/api/owners/notifications/downloads', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    const container = document.getElementById('notificationsList'); 
+    if (!res.ok) {
+        container.innerHTML = '<div>No notifications</div>';
+        return;
+    }
+
+    const events = await res.json();
+    if (events.length === 0) {
+        container.innerHTML = '<div>No downloads yet.</div>';
+        return;
+    }
+
+    container.innerHTML = events.map(e => `
+        <div class="notif-item">
+            <strong>${e.appName}</strong> was downloaded
+            <span style="display:block;color:#9ca3af;font-size:0.75rem;">
+                (${e.createdAt})
+            </span>
+        </div>
+    `).join('');
+}
+document.addEventListener('DOMContentLoaded', () => {
+    loadDownloadNotifications();
+});
+
+
+loadApps();
+</script>
+</body>
+</html>

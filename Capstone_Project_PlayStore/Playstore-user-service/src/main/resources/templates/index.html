@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>PlayStore – Discover Great Apps</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-gradient">
+<header class="nav">
+    <div class="nav-left">
+        <div class="logo">PlayStore<span>User</span></div>
+    </div>
+    <nav class="nav-right">
+        <a th:href="@{/user/login}">Login</a>
+        <a th:href="@{/user/register}" class="nav-btn">Sign up</a>
+    </nav>
+</header>
+
+<main class="hero">
+    <section class="hero-text">
+        <h1>Find, rate & review your favorite apps.</h1>
+        <p>Sign in to explore curated apps, leave reviews, and get notified when your installed apps are updated.</p>
+        <div class="hero-actions">
+            <a th:href="@{/user/login}" class="btn primary">Start using PlayStore</a>
+            <a th:href="@{/user/register}" class="btn ghost">Create account</a>
+        </div>
+        <div class="mini-stats">
+            <div>
+                <h3>1K+</h3><span>Apps listed</span>
+            </div>
+            <div>
+                <h3>4.8★</h3><span>Average rating</span>
+            </div>
+            <div>
+                <h3>24/7</h3><span>Update alerts</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="hero-card">
+        <h2>Why sign in?</h2>
+        <ul>
+            <li>✔ Save your favorite apps</li>
+            <li>✔ Write reviews and comments</li>
+            <li>✔ Get notifications on new versions</li>
+            <li>✔ Filter apps by category and rating</li>
+        </ul>
+    </section>
+</main>
+
+<footer class="footer">
+    <span>© 2025 PlayStore Capstone · User Portal</span>
+</footer>
+</body>
+</html>

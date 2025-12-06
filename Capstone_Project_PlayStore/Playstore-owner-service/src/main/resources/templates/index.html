@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>PlayStore Owner Portal</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-gradient">
+<div class="navbar">
+    <div class="logo">PlayStore<span>Owner</span></div>
+    <div class="nav-links">
+        <a th:href="@{/owner/login}">Login</a>
+        <a th:href="@{/owner/register}" class="nav-btn">Register</a>
+    </div>
+</div>
+
+<section class="hero">
+    <div class="hero-content">
+        <h1>Manage Your Apps Effortlessly</h1>
+        <p>Track downloads, control visibility, and communicate with your users from one powerful dashboard.</p>
+        <div class="hero-actions">
+            <a th:href="@{/owner/login}" class="btn primary">Go to Dashboard</a>
+            <a th:href="@{/owner/register}" class="btn outline">Create Owner Account</a>
+        </div>
+    </div>
+    <div class="hero-card">
+        <h3>Owner Highlights</h3>
+        <ul>
+            <li>✔ Add, update and hide apps</li>
+            <li>✔ See download statistics</li>
+            <li>✔ View and respond to reviews</li>
+            <li>✔ Announce updates to users</li>
+        </ul>
+    </div>
+</section>
+
+<footer class="footer">
+    <span>© 2025 PlayStore Capstone · Owner Portal</span>
+</footer>
+</body>
+</html>
